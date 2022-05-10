@@ -1,5 +1,6 @@
 package ru.yandex.praktikum;
 
+import com.github.javafaker.Faker;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
@@ -10,8 +11,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import ru.yandex.praktikum.model.Order;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
@@ -37,23 +43,29 @@ public class RestCreateOrderTest {
     }
 
     @Before
-    public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+    public void setUp() throws IOException {
+        Properties props = new Properties();
+        props.load(new FileInputStream("src/test/resources/env.properties"));
+        RestAssured.baseURI = props.getProperty("baseURI");;
     }
 
     @Test
     @DisplayName("Успешное создание заказа")
     @Description("Проверяет что заказ успешно создается POST запросом //api/v1/orders и возвращается статус 201 с track")
     public void paramTest() {
+        Faker faker = new Faker();
+        String pattern = "yyyy-MM-dd";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+
         Order order = new Order(
-                "Naruto",
-                "Uchiha",
-                "Konoha, 142 apt.",
-                4,
-                "+7 800 355 35 35",
-                5,
-                "2020-06-06",
-                "Saske, come back to Konoha",
+                faker.name().firstName(),
+                faker.name().lastName(),
+                faker.address().fullAddress(),
+                faker.number().randomDigitNotZero(),
+                faker.phoneNumber().phoneNumber(),
+                faker.number().numberBetween(1, 10),
+                simpleDateFormat.format(faker.date().future(1, TimeUnit.DAYS)),
+                faker.dune().quote(),
                 getArrayString(grey, black)
         );
         Response response = given()
