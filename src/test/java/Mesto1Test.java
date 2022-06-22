@@ -71,7 +71,7 @@ public class Mesto1Test {
     @Description("This test is for check current user's name.")
     public void checkUserName() {
         given()
-                .auth().oauth2(bearerToken) // Передаём токен для аутентификации
+                .auth().oauth2(bearerToken+"11") // Передаём токен для аутентификации
                 .get("/api/users/me") // Делаем GET-запрос
                 .then().assertThat().body("data.name", equalTo("Incorrect Name")); // Проверяем, что имя соответствует ожидаемому
     }
